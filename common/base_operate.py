@@ -4,8 +4,7 @@
 # @FileName: base_operate.py
 
 import time,os,allure
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
+from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from common.public_locator import PublicLocator
@@ -15,7 +14,6 @@ class BaseOperate(PublicLocator):
     def __init__(self,driver):
         self.driver=driver
         self.wait=WebDriverWait(driver=self.driver,timeout=30,poll_frequency=0.5)
-        self.action=ActionChains(self.driver)
         self.project_dir=os.path.dirname(os.path.dirname(__file__))
         self.config_path=os.path.join(self.project_dir,'config')
         self.download_path=os.path.join(self.project_dir,'download')
@@ -25,19 +23,19 @@ class BaseOperate(PublicLocator):
     def findVisibleElement(self,locator,index=0):
         try:
             if index==-1:
-                return self.wait.until(EC.visibility_of_any_elements_located((By.XPATH,locator)))
+                return self.wait.until(EC.visibility_of_any_elements_located((AppiumBy.XPATH,locator)))
             else:
-                return self.wait.until(EC.visibility_of_any_elements_located((By.XPATH,locator)))[index]
+                return self.wait.until(EC.visibility_of_any_elements_located((AppiumBy.XPATH,locator)))[index]
         except Exception:
             assert False,'查找元素失败，请检查！locator表达式为：%s'%str(locator)
 
-    # 查找加载到HTML里面的元素
+    # 查找加载到XML里面的元素
     def findPresenceElement(self,locator,index=0):
         try:
             if index==-1:
-                return self.wait.until(EC.presence_of_all_elements_located((By.XPATH,locator)))
+                return self.wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH,locator)))
             else:
-                return self.wait.until(EC.presence_of_all_elements_located((By.XPATH,locator)))[index]
+                return self.wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH,locator)))[index]
         except Exception:
             assert False,'查找元素失败，请检查！locator表达式为：%s'%str(locator)
 
@@ -46,9 +44,9 @@ class BaseOperate(PublicLocator):
         wait=WebDriverWait(self.driver,time,0.5)
         try:
             if type==1:
-                wait.until(EC.visibility_of_any_elements_located((By.XPATH,locator)))
+                wait.until(EC.visibility_of_any_elements_located((AppiumBy.XPATH,locator)))
             else:
-                wait.until(EC.presence_of_all_elements_located((By.XPATH,locator)))
+                wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH,locator)))
         except Exception:
             return False
         else:
@@ -151,21 +149,6 @@ class BaseOperate(PublicLocator):
                 element=self.findPresenceElement(locator,index)
             return element.value_of_css_property(CSS)
 
-    # 鼠标悬浮操作
-    def mouseHover(self,locator,index=0,type=1):
-        if type==1:
-            # 部分移动操作使用相同的ActionChains对象会报错，这里暂时先都实例化ActionChains
-            ActionChains(self.driver).move_to_element(self.findVisibleElement(locator,index)).perform()
-        else:
-            ActionChains(self.driver).move_to_element(self.findPresenceElement(locator,index)).perform()
-
-    # 鼠标移动操作
-    def mouseMove(self,locator,x,y,index=0,type=1):
-        if type==1:
-            ActionChains(self.driver).move_to_element_with_offset(self.findVisibleElement(locator,index),x,y).perform()
-        else:
-            ActionChains(self.driver).move_to_element_with_offset(self.findPresenceElement(locator,index),x,y).perform()
-
     # 切换frame
     def switchFrame(self,locator,index=0,type=1):
         if type==1:
@@ -184,21 +167,6 @@ class BaseOperate(PublicLocator):
     # 执行JS
     def executeJS(self,JS):
         self.driver.execute_script(JS)
-
-    # 鼠标双击操作
-    def mouseDoubleClick(self,locator):
-        self.scrollElement(locator)
-        ActionChains(self.driver).double_click(self.findVisibleElement(locator)).perform()
-
-    # 切换窗口
-    def switchToWindow(self,windowIndex):
-        handles=self.driver.window_handles
-        self.driver.switch_to.window(handles[windowIndex])
-
-    # 判断是否有新的窗口打开
-    def judgeNewWindowIsOpened(self,handles):
-        # 需要传入在打开新的窗口之前的句柄
-        return self.wait.until(EC.new_window_is_opened(handles))
 
     # 等待
     def sleep(self,s):
