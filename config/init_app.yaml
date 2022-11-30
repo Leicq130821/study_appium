@@ -5,4 +5,4 @@ desired_caps:
   deviceName: 'yeshen'
   appPackage: 'com.joinf.saasapp'
   appActivity: 'com.joinf.saasapp.SplashModule.SplashActivity'
-  noReset: true
+  noReset: false
