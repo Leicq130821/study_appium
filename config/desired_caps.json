@@ -1,0 +1,8 @@
+{
+	"platformName": "Android",
+	"platformVersion": "7.1.2",
+	"deviceName": "yeshen",
+	"appPackage": "com.joinf.saasapp",
+	"appActivity": "com.joinf.saasapp.SplashModule.SplashActivity",
+	"noReset": false
+}
