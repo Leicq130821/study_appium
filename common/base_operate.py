@@ -9,6 +9,8 @@ from utils.create_data import CreateData
 from utils.operate_file import OperateFile
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.actions.mouse_button import MouseButton
 from selenium.webdriver.support import expected_conditions as EC
 from common.public_locator import PublicLocator
 
@@ -23,6 +25,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         self.config_path=os.path.join(self.project_dir,'config')
         self.download_path=os.path.join(self.project_dir,'download')
         self.file_path=os.path.join(self.project_dir,'file')
+        self.action=ActionChains(self.driver,duration=1000)
 
     '''
     通过xpath定位元素，对应app的resource-id属性
@@ -135,35 +138,19 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         else:
             return True
 
-    # 滚动元素到指定位置
-    def scroll_to_element(self,xpath,index=0,type=1):
-        pass
-        # if type==1:
-        #     element=self.find_visible_element(xpath,index)
-        # else:
-        #     element=self.find_visible_element(xpath,index)
-        # JS="arguments[0].scrollIntoView();"
-        # self.driver.execute_script(JS,element)
-
     # 点击元素
-    def click_element(self,xpath,index=0,scroll=1):
-        if scroll:
-            self.scroll_to_element(xpath,index)
-            self.sleep(0.5)
+    def click_element(self,xpath,index=0):
         self.find_visible_element(xpath,index).click()
 
     # 输入内容
-    def element_send_keys(self,xpath,key,clear=1,scroll=1,index=0):
-        if scroll:
-            self.scroll_to_element(xpath,index)
-            self.sleep(0.5)
+    def element_send_keys(self,xpath,key,clear=1,index=0):
         if clear:
             self.find_visible_element(xpath,index).clear()
             self.sleep(0.5)
         self.find_visible_element(xpath,index).send_keys(str(key))
 
     # 获取元素文本
-    def get_element_text(self,xpath,index=0,scroll=0,type=1):
+    def get_element_text(self,xpath,index=0,type=1):
         if index==-1:
             if type==1:
                 elements=self.find_visible_element(xpath,index)
@@ -171,9 +158,6 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
                 elements=self.find_presence_element(xpath,index)
             return [element.text for element in elements]
         else:
-            if scroll:
-                self.scroll_to_element(xpath,index,type)
-                self.sleep(0.5)
             if type==1:
                 return self.find_visible_element(xpath,index).text
             else:
@@ -233,24 +217,14 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
                 element=self.find_presence_element(xpath,index)
             return element.value_of_css_property(CSS)
 
-    # 切换frame
-    def switch_frame(self,xpath,index=0,type=1):
-        if type==1:
-            self.wait.until(EC.frame_to_be_available_and_switch_to_it(self.find_visible_element(xpath,index)))
-        else:
-            self.wait.until(EC.frame_to_be_available_and_switch_to_it(self.find_presence_element(xpath,index)))
-
-    # 切回父frame
-    def switch_parent_frame(self):
-        self.driver.switch_to.parent_frame()
-
-    # 切回主文档
-    def switch_main_page(self):
-        self.driver.switch_to.default_content()
+    # 切换环境
+    def switch_context(self,index):
+        contexts=self.driver.contexts
+        self.driver.switch_to.context(contexts[index])
 
     # 执行JS
-    def execute_js(self,JS):
-        self.driver.execute_script(JS)
+    def execute_js(self,js):
+        self.driver.execute_script(js)
 
     # 等待
     def sleep(self,s):
@@ -259,3 +233,60 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
     # 截图
     def get_screenshot(self,title='截图'):
         allure.attach(self.driver.get_screenshot_as_png(),title,allure.attachment_type.PNG)
+
+    # 缩放操作
+    def zoom(self,type):
+        self.action.w3c_actions.devices=[]
+        finger_one=self.action.w3c_actions.add_pointer_input('touch','finger_one')
+        finger_two=self.action.w3c_actions.add_pointer_input('touch','finger_two')
+        window_size=self.driver.get_window_size()
+        x=window_size['width']
+        y=window_size['height']
+        # 放大
+        if type=='in':
+            finger_one.create_pointer_move(x=0.4*x,y=0.4*y)
+            finger_two.create_pointer_move(x=0.6*x,y=0.6*y)
+        # 缩小
+        else:
+            finger_one.create_pointer_move(x=0.2*x,y=0.2*y)
+            finger_two.create_pointer_move(x=0.8*x,y=0.8*y)
+        finger_one.create_pointer_down(x=MouseButton.LEFT)
+        finger_two.create_pointer_down(x=MouseButton.LEFT)
+        if type=='in':
+            finger_one.create_pointer_move(x=0.2*x,y=0.2*y)
+            finger_two.create_pointer_move(x=0.8*x,y=0.8*y)
+        else:
+            finger_one.create_pointer_move(x=0.4*x,y=0.4*y)
+            finger_two.create_pointer_move(x=0.6*x,y=0.6*y)
+        finger_one.create_pointer_up(MouseButton.LEFT)
+        finger_two.create_pointer_up(MouseButton.LEFT)
+        self.action.perform()
+
+    # 触控滑动
+    def touch_slide(self,*point_tuple):
+        self.action.w3c_actions.devices=[]
+        finger=self.action.w3c_actions.add_pointer_input('touch','finger')
+        finger.create_pointer_move(x=point_tuple[0]['x'],y=point_tuple[0]['y'])
+        finger.create_pointer_down(x=MouseButton.LEFT)
+        for point in point_tuple[1:]:
+            finger.create_pointer_move(x=point['x'],y=point['y'])
+            finger.create_pause(1)
+        finger.create_pointer_up(MouseButton.LEFT)
+        self.action.perform()
+
+    # 移动到元素
+    def move_to(self,xpath):
+        self.action.w3c_actions.devices=[]
+        finger=self.action.w3c_actions.add_pointer_input('touch','finger')
+        finger.create_pointer_move(origin=self.find_visible_element(xpath))
+        self.action.perform()
+
+    # 长按
+    def long_press(self,xpath,duration):
+        self.action.w3c_actions.devices=[]
+        finger=self.action.w3c_actions.add_pointer_input('touch','finger')
+        finger.create_pointer_move(origin=self.find_visible_element(xpath))
+        finger.create_pointer_down(x=MouseButton.LEFT)
+        finger.create_pause(duration)
+        finger.create_pointer_up(MouseButton.LEFT)
+        self.action.perform()
