@@ -3,33 +3,21 @@
 # @Author  : LCQ
 # @FileName: conftest.py
 
-from common.init_app import init_driver
-from selenium.webdriver.support import expected_conditions as EC
+from common.init_app import init_app
 from common.base_operate import BaseOperate
-import pytest,time,allure
+import pytest,allure
 
 # 登录
 @pytest.fixture(scope='session')
 def login():
-    global driver
-    driver=init_driver()
-    operate = BaseOperate(driver)
-    trade = operate.getElementText(operate.href_link.format('https://trade.joinf.com'))
-    if trade == 'Trade':
-        operate.clickElement(operate.id_div.format('switchGroup'))
-        operate.clickElement(operate.switch_language.format('zh'))
+    driver=init_app()
+    global base_operate
+    base_operate=BaseOperate(driver)
+    base_operate.click_element(base_operate.text_element.format('允许'))
+    base_operate.element_send_keys(base_operate.class_element.format('android.widget.EditText'),'lcq_ui_test')
+    base_operate.element_send_keys(base_operate.class_element.format('android.widget.EditText'),'123456',index=1)
+    base_operate.click_element(base_operate.text_element.format('登录'))
     return driver
-
-# 自动刷新
-@pytest.fixture(scope="function",autouse=True)
-def autoRefresh():
-    driver.refresh()
-    # 判断是否有弹窗
-    time.sleep(1)
-    alert=EC.alert_is_present()(driver)
-    if alert:
-        alert.accept()
-    time.sleep(5)
 
 # 用例失败添加截图
 @pytest.hookimpl(tryfirst=True,hookwrapper=True)
@@ -38,12 +26,13 @@ def pytest_runtest_makereport(item,call):
     rep = outcome.get_result()
     if rep.when == "call" and rep.failed:
         with allure.step('用例失败截图'):
-            allure.attach(driver.get_screenshot_as_png(),"截图",allure.attachment_type.PNG)
+            base_operate.get_screenshot()
 
 # 关闭浏览器
 @pytest.fixture(scope="session",autouse=True)
-def quitDriver():
+def quitDriver(login):
     yield
+    driver=login
     driver.quit()
 
 # 用例名称中文编码格式

@@ -5,4 +5,6 @@ desired_caps:
   deviceName: 'yeshen'
   appPackage: 'com.joinf.saasapp'
   appActivity: 'com.joinf.saasapp.SplashModule.SplashActivity'
+  automationName: 'uiautomator2'
   noReset: false
+  newCommandTimeout: 120
