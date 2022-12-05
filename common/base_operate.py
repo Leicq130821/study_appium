@@ -42,7 +42,8 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
             else:
                 return self.wait.until(EC.visibility_of_any_elements_located((AppiumBy.XPATH,xpath)))[index]
         except Exception:
-            assert False,'查找元素失败，请检查！xpath表达式为：%s'%str(xpath)
+            self.log_error('查找元素失败，请检查！xpath表达式为：%s'%xpath)
+            assert False,'查找元素失败，请检查！xpath表达式为：%s'%xpath
 
     '''
     通过id定位元素，对应app的resource-id属性
@@ -103,17 +104,21 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
     先获取到屏幕的尺寸，然后利用比例确定x,y数值，这种是万能方法。
     '''
     def swipe(self,direction='left',duration=1000):
-        window_size=self.driver.get_window_size()
-        x=window_size['width']
-        y=window_size['height']
-        if direction=='up':
-            self.driver.swipe(start_x=0.5*x,start_y=0.8*y,end_x=0.5*x,end_y=0.2*y,duration=duration)
-        elif direction=='down':
-            self.driver.swipe(start_x=0.5*x,start_y=0.2*y,end_x=0.5*x,end_y=0.8*y,duration=duration)
-        elif direction=='left':
-            self.driver.swipe(start_x=0.8*x,start_y=0.5*y,end_x=0.2*x,end_y=0.5*y,duration=duration)
-        elif direction=='right':
-            self.driver.swipe(start_x=0.2*x,start_y=0.5*y,end_x=0.8*x,end_y=0.5*y,duration=duration)
+        try:
+            window_size=self.driver.get_window_size()
+            x=window_size['width']
+            y=window_size['height']
+            if direction=='up':
+                self.driver.swipe(start_x=0.5*x,start_y=0.8*y,end_x=0.5*x,end_y=0.2*y,duration=duration)
+            elif direction=='down':
+                self.driver.swipe(start_x=0.5*x,start_y=0.2*y,end_x=0.5*x,end_y=0.8*y,duration=duration)
+            elif direction=='left':
+                self.driver.swipe(start_x=0.8*x,start_y=0.5*y,end_x=0.2*x,end_y=0.5*y,duration=duration)
+            elif direction=='right':
+                self.driver.swipe(start_x=0.2*x,start_y=0.5*y,end_x=0.8*x,end_y=0.5*y,duration=duration)
+        except Exception as error:
+            self.log_error('滑屏操作失败，错误信息为：%s，请检查！'%error)
+            assert False,'滑屏操作失败，错误信息为：%s，请检查！'%error
 
     # 查找加载到XML里面的元素
     def find_presence_element(self,xpath,index=0):
@@ -123,7 +128,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
             else:
                 return self.wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH,xpath)))[index]
         except Exception:
-            assert False,'查找元素失败，请检查！xpath表达式为：%s'%str(xpath)
+            assert False,'查找元素失败，请检查！xpath表达式为：%s'%xpath
 
     # 判断元素是否存在
     def judge_element_exist(self,xpath,time=5,type=1):
@@ -275,10 +280,17 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         self.action.perform()
 
     # 移动到元素
-    def move_to(self,xpath):
+    def move_to_element(self,xpath):
         self.action.w3c_actions.devices=[]
         finger=self.action.w3c_actions.add_pointer_input('touch','finger')
         finger.create_pointer_move(origin=self.find_visible_element(xpath))
+        self.action.perform()
+
+    # 移动到坐标
+    def move_to_coord(self,x,y):
+        self.action.w3c_actions.devices=[]
+        finger=self.action.w3c_actions.add_pointer_input('touch','finger')
+        finger.create_pointer_move(x=x,y=y)
         self.action.perform()
 
     # 长按
@@ -290,3 +302,19 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         finger.create_pause(duration)
         finger.create_pointer_up(MouseButton.LEFT)
         self.action.perform()
+
+    '''
+    先移动到一个元素，按下，然后移动至另外一个元素后释放，存在惯性滑动。
+    '''
+    def scroll(self,xpath_one,xpath_two,duration=1000):
+        origin_element=self.find_visible_element(xpath_one)
+        destination_element=self.find_visible_element(xpath_two)
+        self.driver.scroll(origin_element,destination_element,duration=duration)
+
+    '''
+    先移动到一个元素，按下，然后移动至另外一个元素后释放，不存在惯性滑动。
+    '''
+    def drag_and_drop(self,xpath_one,xpath_two):
+        origin_element=self.find_visible_element(xpath_one)
+        destination_element=self.find_visible_element(xpath_two)
+        self.driver.drag_and_drop(origin_element,destination_element)
