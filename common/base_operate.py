@@ -97,29 +97,6 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         except Exception:
             assert False,'查找元素失败，请检查！元素的accessibility_id为：%s'%str(value)
 
-    '''
-    滑屏操作
-    滑屏操作需要四个坐标参数：start_x（开始滑时x坐标），end_x（结束滑时x坐标），
-                              start_y（开始滑时y坐标），end_y（结束滑时y坐标）。
-    先获取到屏幕的尺寸，然后利用比例确定x,y数值，这种是万能方法。
-    '''
-    def swipe(self,direction='left',duration=1000):
-        try:
-            window_size=self.driver.get_window_size()
-            x=window_size['width']
-            y=window_size['height']
-            if direction=='up':
-                self.driver.swipe(start_x=0.5*x,start_y=0.8*y,end_x=0.5*x,end_y=0.2*y,duration=duration)
-            elif direction=='down':
-                self.driver.swipe(start_x=0.5*x,start_y=0.2*y,end_x=0.5*x,end_y=0.8*y,duration=duration)
-            elif direction=='left':
-                self.driver.swipe(start_x=0.8*x,start_y=0.5*y,end_x=0.2*x,end_y=0.5*y,duration=duration)
-            elif direction=='right':
-                self.driver.swipe(start_x=0.2*x,start_y=0.5*y,end_x=0.8*x,end_y=0.5*y,duration=duration)
-        except Exception as error:
-            self.log_error('滑屏操作失败，错误信息为：%s，请检查！'%error)
-            assert False,'滑屏操作失败，错误信息为：%s，请检查！'%error
-
     # 查找加载到XML里面的元素
     def find_presence_element(self,xpath,index=0):
         try:
@@ -239,6 +216,29 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
     def get_screenshot(self,title='截图'):
         allure.attach(self.driver.get_screenshot_as_png(),title,allure.attachment_type.PNG)
 
+    '''
+    滑屏操作
+    滑屏操作需要四个坐标参数：start_x（开始滑时x坐标），end_x（结束滑时x坐标），
+                              start_y（开始滑时y坐标），end_y（结束滑时y坐标）。
+    先获取到屏幕的尺寸，然后利用比例确定x,y数值，这种是万能方法。
+    '''
+    def swipe_screen(self,direction='left',duration=1000):
+        try:
+            window_size=self.driver.get_window_size()
+            x=window_size['width']
+            y=window_size['height']
+            if direction=='up':
+                self.driver.swipe(start_x=0.5*x,start_y=0.8*y,end_x=0.5*x,end_y=0.2*y,duration=duration)
+            elif direction=='down':
+                self.driver.swipe(start_x=0.5*x,start_y=0.2*y,end_x=0.5*x,end_y=0.8*y,duration=duration)
+            elif direction=='left':
+                self.driver.swipe(start_x=0.8*x,start_y=0.5*y,end_x=0.2*x,end_y=0.5*y,duration=duration)
+            elif direction=='right':
+                self.driver.swipe(start_x=0.2*x,start_y=0.5*y,end_x=0.8*x,end_y=0.5*y,duration=duration)
+        except Exception as error:
+            self.log_error('滑屏操作失败，错误信息为：%s，请检查！'%error)
+            assert False,'滑屏操作失败，错误信息为：%s，请检查！'%error
+
     # 缩放操作
     def zoom(self,type):
         self.action.w3c_actions.devices=[]
@@ -267,8 +267,8 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         finger_two.create_pointer_up(MouseButton.LEFT)
         self.action.perform()
 
-    # 触控滑动
-    def touch_slide(self,*point_tuple):
+    # 触屏滑动
+    def touch_screen_swipe(self,*point_tuple):
         self.action.w3c_actions.devices=[]
         finger=self.action.w3c_actions.add_pointer_input('touch','finger')
         finger.create_pointer_move(x=point_tuple[0]['x'],y=point_tuple[0]['y'])
@@ -306,7 +306,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
     '''
     先移动到一个元素，按下，然后移动至另外一个元素后释放，存在惯性滑动。
     '''
-    def scroll(self,xpath_one,xpath_two,duration=1000):
+    def scroll(self,xpath_one,xpath_two,duration=600):
         origin_element=self.find_visible_element(xpath_one)
         destination_element=self.find_visible_element(xpath_two)
         self.driver.scroll(origin_element,destination_element,duration=duration)
