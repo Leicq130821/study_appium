@@ -318,3 +318,20 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         origin_element=self.find_visible_element(xpath_one)
         destination_element=self.find_visible_element(xpath_two)
         self.driver.drag_and_drop(origin_element,destination_element)
+
+    '''
+    设置设备网络
+    NO_CONNECTION = 0
+    AIRPLANE_MODE = 1
+    WIFI_ONLY = 2
+    DATA_ONLY = 4
+    ALL_NETWORK_ON = 6
+    '''
+    def device_network(self,type):
+        self.driver.set_network_connection(type)
+
+    '''
+    设备按键
+    '''
+    def device_press(self,code):
+        self.driver.press_keycode(code)
