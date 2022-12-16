@@ -28,6 +28,5 @@ class NewEmailPage(BaseOperate,NewEmailLocator):
             pytest.assume(added_recipients==['客户UI自动化测试<testui@qq.com>'],'添加的收件人不正确，请检查！')
             self.get_screenshot()
         with allure.step('填写邮件主题、正文，添加附件，进行发送邮件'):
-
             self.element_send_keys(self.subject_edit_text,'邮件主题：%s'%time.strftime('%H'))
             self.element_send_keys(self.email_content_edit_text,'邮件正文')
