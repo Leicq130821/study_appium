@@ -13,8 +13,10 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.actions.mouse_button import MouseButton
 from selenium.webdriver.support import expected_conditions as EC
 from common.public_locator import PublicLocator
+from appium.webdriver.connectiontype import ConnectionType
+from common.press_dict import PressDict
 
-class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
+class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,PressDict):
 
     def __init__(self,driver):
         super().__init__()
@@ -28,7 +30,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         self.action=ActionChains(self.driver,duration=1000)
 
     '''
-    通过xpath定位元素，对应app的resource-id属性
+    通过xpath定位元素
     value-demo：//*[@resource-id="com.tal.kaoyan:id/kylogin_phone_input_phonenum"]
     value-demo：//android.widget.EditText
     value-demo：//*[@class="android.widget.EditText"]
@@ -320,7 +322,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         self.driver.drag_and_drop(origin_element,destination_element)
 
     '''
-    设置设备网络
+    设置设备网络：使用ConnectionType类来进行设置
     NO_CONNECTION = 0
     AIRPLANE_MODE = 1
     WIFI_ONLY = 2
@@ -331,7 +333,8 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile):
         self.driver.set_network_connection(type)
 
     '''
-    设备按键
+    设备按键：可以定义一个字典类来进行设置code
+    设备的按键都有一个对应code
     '''
     def device_press(self,code):
         self.driver.press_keycode(code)
