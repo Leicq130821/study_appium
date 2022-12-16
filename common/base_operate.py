@@ -14,9 +14,9 @@ from selenium.webdriver.common.actions.mouse_button import MouseButton
 from selenium.webdriver.support import expected_conditions as EC
 from common.public_locator import PublicLocator
 from appium.webdriver.connectiontype import ConnectionType
-from common.press_dict import PressDict
+from appium.webdriver.extensions.android.nativekey import AndroidKey
 
-class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,PressDict):
+class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,AndroidKey):
 
     def __init__(self,driver):
         super().__init__()
@@ -333,8 +333,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,PressD
         self.driver.set_network_connection(type)
 
     '''
-    设备按键：可以定义一个字典类来进行设置code
-    设备的按键都有一个对应code
+    设备按键：使用AndroidKey类来进行设置
     '''
-    def device_press(self,code):
+    def press_keycode(self,code):
         self.driver.press_keycode(code)
