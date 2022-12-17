@@ -17,3 +17,5 @@ class NewEmailLocator():
     attach=('附件','//*[@text="icon.png"]')
     attach_is_processing=('文件正在处理中','//*[contains(@text,"文件正在处理中")]')
     send=('发送','//*[@text="发送"]')
+    save_as_draft=('存为草稿','//*[contains(@text,"iKusSsimz")]')
+    back_icon=('退回按钮','//*[@text="收件箱"]/../preceding-sibling::*')
