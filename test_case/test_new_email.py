@@ -11,10 +11,17 @@ from utils.log import get_logger
 class TestNewEmail():
 
     @allure.story('新邮件：发送邮件')
+    @pytest.mark.run(order=1)
     def test_send_email(self,login):
         logger=get_logger(time.strftime('新邮件：发送邮件：%Y%m%d %H.%M'))
         self.new_email_page=NewEmailPage(login,logger)
         self.new_email_page.send_email()
+
+    @allure.story('新邮件：存为草稿邮件')
+    def test_save_as_draft_email(self,login):
+        logger=get_logger(time.strftime('新邮件：存为草稿邮件：%Y%m%d %H.%M'))
+        self.new_email_page=NewEmailPage(login,logger)
+        self.new_email_page.save_as_draft_email()
 
 if __name__ == '__main__':
     pytest.main(['-s','-v'])
