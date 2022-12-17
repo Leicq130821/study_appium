@@ -4,7 +4,6 @@
 # @FileName: base_operate.py
 
 import time,os,allure
-from common.log import Log
 from utils.create_data import CreateData
 from utils.operate_file import OperateFile
 from appium.webdriver.common.appiumby import AppiumBy
@@ -16,12 +15,12 @@ from common.public_locator import PublicLocator
 from appium.webdriver.connectiontype import ConnectionType
 from appium.webdriver.extensions.android.nativekey import AndroidKey
 
-class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,AndroidKey):
+class BaseOperate(PublicLocator,CreateData,OperateFile,ConnectionType,AndroidKey):
 
-    def __init__(self,driver):
+    def __init__(self,driver,logger):
         super().__init__()
-        super(CreateData,self).__init__()
         self.driver=driver
+        self.logger=logger
         self.wait=WebDriverWait(driver=self.driver,timeout=30,poll_frequency=0.5)
         self.project_dir=os.path.dirname(os.path.dirname(__file__))
         self.config_path=os.path.join(self.project_dir,'config')
@@ -44,7 +43,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
             else:
                 return self.wait.until(EC.visibility_of_any_elements_located((AppiumBy.XPATH,locator[1])))[index]
         except Exception:
-            self.log_error('查找%s失败，请检查！xpath表达式为：%s'%(locator[0],locator[1]))
+            self.logger.error('查找%s失败，请检查！xpath表达式为：%s'%(locator[0],locator[1]))
             assert False,'查找%s失败，请检查！xpath表达式为：%s'%(locator[0],locator[1])
 
     # 查找加载到XML里面的元素
@@ -55,11 +54,12 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
             else:
                 return self.wait.until(EC.presence_of_all_elements_located((AppiumBy.XPATH,locator[1])))[index]
         except Exception:
-            self.log_error('查找%s失败，请检查！xpath表达式为：%s'%(locator[0],locator[1]))
+            self.logger.error('查找%s失败，请检查！xpath表达式为：%s'%(locator[0],locator[1]))
             assert False,'查找%s失败，请检查！xpath表达式为：%s'%(locator[0],locator[1])
 
     # 判断元素是否存在
     def judge_element_exist(self,locator,time=5,type=1):
+        self.logger.info('判断%s是否存在'%locator[0])
         wait=WebDriverWait(self.driver,time,0.5)
         try:
             if type==1:
@@ -76,9 +76,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
         element=self.find_visible_element(locator,index)
         try:
             element.click()
-            self.log_info('点击%s'%locator[0])
+            self.logger.info('点击%s'%locator[0])
         except Exception as error:
-            self.log_error('点击%s失败，请检查！错误信息为：%s' % (locator[0], str(error)))
+            self.logger.error('点击%s失败，请检查！错误信息为：%s' % (locator[0], str(error)))
             assert False, '点击%s失败，请检查！错误信息为：%s' % (locator[0], str(error))
 
     # 输入内容
@@ -89,9 +89,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
                 element.clear()
                 self.sleep(0.2)
             element.send_keys(str(key))
-            self.log_info('%s输入值：%s'%(locator[0],str(key)))
+            self.logger.info('%s输入值：%s'%(locator[0],str(key)))
         except Exception as error:
-            self.log_error('%s输入值失败，请检查！错误信息为：%s' % (locator[0],str(error)))
+            self.logger.error('%s输入值失败，请检查！错误信息为：%s' % (locator[0],str(error)))
             assert False, '%s输入值失败，请检查！错误信息为：%s' % (locator[0],str(error))
 
     # 获取元素文本
@@ -103,10 +103,10 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
                 elements=self.find_presence_element(locator,index)
             try:
                 text_list=[element.text for element in elements]
-                self.log_info('获取%s文本'%locator[0])
+                self.logger.info('获取%s文本'%locator[0])
                 return text_list
             except Exception as error:
-                self.log_error('获取%s文本失败，请检查！错误信息为：%s' % (locator[0], str(error)))
+                self.logger.error('获取%s文本失败，请检查！错误信息为：%s' % (locator[0], str(error)))
                 assert False,'获取%s文本失败，请检查！错误信息为：%s' % (locator[0], str(error))
         else:
             if type==1:
@@ -115,10 +115,10 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
                 element=self.find_presence_element(locator,index).text
             try:
                 text=element.text
-                self.log_info('获取%s文本'%locator[0])
+                self.logger.info('获取%s文本'%locator[0])
                 return text
             except Exception as error:
-                self.log_error('获取%s文本失败，请检查！错误信息为：%s' % (locator[0], str(error)))
+                self.logger.error('获取%s文本失败，请检查！错误信息为：%s' % (locator[0], str(error)))
                 assert False,'获取%s文本失败，请检查！错误信息为：%s' % (locator[0], str(error))
 
     # 获取元素的属性
@@ -130,10 +130,10 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
                 elements=self.find_presence_element(locator,index)
             try:
                 attribute_value_list=[element.get_attribute(attribute) for element in elements]
-                self.log_info('获取%s的%s'%(locator[0],attribute))
+                self.logger.info('获取%s的%s'%(locator[0],attribute))
                 return attribute_value_list
             except Exception as error:
-                self.log_error('获取%s的%s，请检查！错误信息为：%s' % (locator[0],attribute,str(error)))
+                self.logger.error('获取%s的%s，请检查！错误信息为：%s' % (locator[0],attribute,str(error)))
                 assert False,'获取%s的%s，请检查！错误信息为：%s' % (locator[0],attribute,str(error))
         else:
             if type==1:
@@ -142,10 +142,10 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
                 element=self.find_presence_element(locator,index)
             try:
                 attribute_value=element.get_attribute(attribute)
-                self.log_info('获取%s的%s' % (locator[0],attribute))
+                self.logger.info('获取%s的%s' % (locator[0],attribute))
                 return attribute_value
             except Exception as error:
-                self.log_error('获取%s的%s，请检查！错误信息为：%s' % (locator[0],attribute,str(error)))
+                self.logger.error('获取%s的%s，请检查！错误信息为：%s' % (locator[0],attribute,str(error)))
                 assert False,'获取%s的%s，请检查！错误信息为：%s' % (locator[0],attribute,str(error))
 
     # 切换环境
@@ -153,18 +153,18 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
         try:
             contexts=self.driver.contexts
             self.driver.switch_to.context(contexts[index])
-            self.log_info('切换环境')
+            self.logger.info('切换环境')
         except Exception as error:
-            self.log_error('切换环境失败，请检查！错误信息为：%s' % str(error))
+            self.logger.error('切换环境失败，请检查！错误信息为：%s' % str(error))
             assert False,'切换环境失败，请检查！错误信息为：%s' % str(error)
 
     # 执行JS
     def execute_js(self,js):
         try:
             self.driver.execute_script(js)
-            self.log_info('执行js:%s'%js)
+            self.logger.info('执行js:%s'%js)
         except Exception as error:
-            self.log_error('执行js:%s失败，请检查！错误信息为：%s' % (js,str(error)))
+            self.logger.error('执行js:%s失败，请检查！错误信息为：%s' % (js,str(error)))
             assert False,'执行js:%s失败，请检查！错误信息为：%s' % (js,str(error))
     # 等待
     def sleep(self,s):
@@ -197,9 +197,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
                 self.driver.swipe(start_x=0.8*x,start_y=0.5*y,end_x=0.2*x,end_y=0.5*y,duration=duration)
             elif direction=='right':
                 self.driver.swipe(start_x=0.2*x,start_y=0.5*y,end_x=0.8*x,end_y=0.5*y,duration=duration)
-            self.log_info(__swipe_dict[duration])
+            self.logger.info(__swipe_dict[duration])
         except Exception as error:
-            self.log_error('%s失败，错误信息为：%s，请检查！'%(__swipe_dict[duration],error))
+            self.logger.error('%s失败，错误信息为：%s，请检查！'%(__swipe_dict[duration],error))
             assert False,'%s失败，错误信息为：%s，请检查！'%(__swipe_dict[duration],error)
 
     # 缩放操作
@@ -232,9 +232,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
             finger_one.create_pointer_up(MouseButton.LEFT)
             finger_two.create_pointer_up(MouseButton.LEFT)
             self.action.perform()
-            self.log_info(__zoom_dict[type])
+            self.logger.info(__zoom_dict[type])
         except Exception as error:
-            self.log_error('%s失败，错误信息为：%s，请检查！'%(__zoom_dict[type],error))
+            self.logger.error('%s失败，错误信息为：%s，请检查！'%(__zoom_dict[type],error))
             assert False,'%s失败，错误信息为：%s，请检查！'%(__zoom_dict[type],error)
 
     # 触屏滑动
@@ -249,9 +249,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
                 finger.create_pause(1)
             finger.create_pointer_up(MouseButton.LEFT)
             self.action.perform()
-            self.log_info('触屏滑动')
+            self.logger.info('触屏滑动')
         except Exception as error:
-            self.log_error('触屏滑动失败，错误信息为：%s，请检查！'%error)
+            self.logger.error('触屏滑动失败，错误信息为：%s，请检查！'%error)
             assert False,'触屏滑动失败，错误信息为：%s，请检查！'%error
 
     # 移动到元素
@@ -262,9 +262,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
             finger=self.action.w3c_actions.add_pointer_input('touch','finger')
             finger.create_pointer_move(origin=element)
             self.action.perform()
-            self.log_info('移动到%s'%locator[0])
+            self.logger.info('移动到%s'%locator[0])
         except Exception as error:
-            self.log_error('移动到%s失败，错误信息为：%s，请检查！'%(locator[0],error))
+            self.logger.error('移动到%s失败，错误信息为：%s，请检查！'%(locator[0],error))
             assert False,'移动到%s失败，错误信息为：%s，请检查！'%(locator[0],error)
 
     # 移动到坐标
@@ -274,9 +274,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
             finger=self.action.w3c_actions.add_pointer_input('touch','finger')
             finger.create_pointer_move(x=x,y=y)
             self.action.perform()
-            self.log_info('移动到坐标(%s,%s)' % (x,y))
+            self.logger.info('移动到坐标(%s,%s)' % (x,y))
         except Exception as error:
-            self.log_error('移动到坐标(%s,%s)失败，错误信息为：%s，请检查！'%(x,y,error))
+            self.logger.error('移动到坐标(%s,%s)失败，错误信息为：%s，请检查！'%(x,y,error))
             assert False,'移动到坐标(%s,%s)失败，错误信息为：%s，请检查！'%(x,y,error)
 
     # 长按
@@ -290,9 +290,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
             finger.create_pause(duration)
             finger.create_pointer_up(MouseButton.LEFT)
             self.action.perform()
-            self.log_info('长按%s' % locator[0])
+            self.logger.info('长按%s' % locator[0])
         except Exception as error:
-            self.log_error('长按%s失败，错误信息为：%s，请检查！'%(locator[0],error))
+            self.logger.error('长按%s失败，错误信息为：%s，请检查！'%(locator[0],error))
             assert False,'长按%s失败，错误信息为：%s，请检查！'%(locator[0],error)
 
     '''
@@ -303,9 +303,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
         destination_element=self.find_visible_element(destination_locator)
         try:
             self.driver.scroll(origin_element,destination_element,duration=duration)
-            self.log_info('从%s移动到%s'%(origin_locator[0],destination_locator[0]))
+            self.logger.info('从%s移动到%s'%(origin_locator[0],destination_locator[0]))
         except Exception as error:
-            self.log_error('从%s移动到%s失败，错误信息为：%s，请检查！'%(origin_element[0],destination_element[0],error))
+            self.logger.error('从%s移动到%s失败，错误信息为：%s，请检查！'%(origin_element[0],destination_element[0],error))
             assert False,'从%s移动到%s失败，错误信息为：%s，请检查！'%(origin_element[0],destination_element[0],error)
 
     '''
@@ -316,9 +316,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
         destination_element=self.find_visible_element(destination_locator)
         try:
             self.driver.drag_and_drop(origin_element,destination_element)
-            self.log_info('从%s移动到%s并释放'%(origin_locator[0],destination_locator[0]))
+            self.logger.info('从%s移动到%s并释放'%(origin_locator[0],destination_locator[0]))
         except Exception as error:
-            self.log_error('从%s移动到%s并释放失败，错误信息为：%s，请检查！'%(origin_element[0],destination_element[0],error))
+            self.logger.error('从%s移动到%s并释放失败，错误信息为：%s，请检查！'%(origin_element[0],destination_element[0],error))
             assert False,'从%s移动到%s并释放失败，错误信息为：%s，请检查！'%(origin_element[0],destination_element[0],error)
 
     '''
@@ -332,9 +332,9 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
     def device_network(self,type):
         try:
             self.driver.set_network_connection(type)
-            self.log_info('设置网络')
+            self.logger.info('设置网络')
         except Exception as error:
-            self.log_error('设置网络失败，错误信息为：%s，请检查！'%error)
+            self.logger.error('设置网络失败，错误信息为：%s，请检查！'%error)
             assert False,'设置网络失败，错误信息为：%s，请检查！'%error
 
     '''
@@ -343,7 +343,7 @@ class BaseOperate(PublicLocator,CreateData,Log,OperateFile,ConnectionType,Androi
     def press_keycode(self,code):
         try:
             self.driver.press_keycode(code)
-            self.log_info('操作设备按键')
+            self.logger.info('操作设备按键')
         except Exception as error:
-            self.log_error('操作设备按键失败，错误信息为：%s，请检查！'%error)
+            self.logger.error('操作设备按键失败，错误信息为：%s，请检查！'%error)
             assert False,'操作设备按键失败，错误信息为：%s，请检查！'%error
