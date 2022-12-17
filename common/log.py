@@ -22,7 +22,7 @@ class Log():
         # 创建控制台
         console_handler=logging.StreamHandler()
         # 创建文件控制器
-        file_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs','%s.log' % time.strftime('%Y-%m-%d'))
+        file_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs','%s.log' % time.strftime('%Y-%m-%d %H.%M,%S'))
         file_handler=logging.FileHandler(file_path, encoding='utf-8')
         # 创建格式器
         fmt='%(asctime)s %(filename)s %(levelname)s %(funcName)s %(message)s'

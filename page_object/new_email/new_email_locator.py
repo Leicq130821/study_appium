@@ -3,19 +3,12 @@
 # @Author  : LCQ
 # @FileName: new_email_locator.py
 
-from common.public_locator import PublicLocator
+class NewEmailLocator():
 
-class NewEmailLocator(PublicLocator):
-
-    # 新邮件
-    new_email=PublicLocator.text_element.format('新邮件')
-    # 主题编辑框
-    subject_edit_text=PublicLocator.follow_text_edit_text.format('主题 :')
-    # 添加收件人图标
-    add_recipient_icon=PublicLocator.down_text_image.format('收件人 :')
-    # 客户联系人搜索编辑框
-    customer_contact_search_edit_text=PublicLocator.follow_text_edit_text.format('客户联系人')
-    # 添加的收件人
-    added_recipient='//android.widget.TextView[@text="收件人 :"]/following-sibling::*//android.widget.TextView'
-    # 邮件正文编辑框
-    email_content_edit_text='//*[@resource-id="cke_ckeditor"]//android.widget.EditText'
+    new_email=('新邮件','//*[normalize-space(@text)="新邮件"]')
+    subject_edit_text=('主题编辑框','//*[normalize-space(@text)="主题 :"]/following-sibling::android.widget.EditText')
+    add_recipient_icon=('添加收件人图标','//*[normalize-space(@text)="收件人 :"]//android.widget.Image')
+    customer_contact_search_edit_text=('客户联系人搜索编辑框','//*[normalize-space(@text)="客户联系人"]/following-sibling::android.widget.EditText')
+    added_recipient=('添加的收件人','//android.widget.TextView[@text="收件人 :"]/following-sibling::*//android.widget.TextView')
+    email_content_edit_text=('邮件正文编辑框','//*[@resource-id="cke_ckeditor"]//android.widget.EditText')
+    email_attach_icon=('邮件附件图标','//*[@text="主题 :"]//android.widget.Image')

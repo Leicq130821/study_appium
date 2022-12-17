@@ -3,10 +3,7 @@
 # @Author  : LCQ
 # @FileName: start_multi_appium.py
 
-
-import subprocess
-import time
-
+import subprocess,time
 
 def start(host,port):
 
