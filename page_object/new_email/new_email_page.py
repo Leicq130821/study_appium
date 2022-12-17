@@ -9,8 +9,8 @@ from common.base_operate import BaseOperate
 
 class NewEmailPage(BaseOperate,NewEmailLocator):
 
-    def __init__(self,driver):
-        super().__init__(driver)
+    def __init__(self,driver,logger):
+        super().__init__(driver,logger)
         self.click_element(self.new_email)
 
     # 发送邮件
@@ -19,7 +19,7 @@ class NewEmailPage(BaseOperate,NewEmailLocator):
             self.click_element(self.add_recipient_icon)
             self.element_send_keys(self.customer_contact_search_edit_text,'测试')
             self.press_keycode(self.ENTER)
-            self.click_element(self.text_element.format('客户UI自动化测试 <testui@qq.com>'))
+            self.click_element(self.customer_contact)
             self.get_screenshot()
         with allure.step('选择联系人，点击确定，将联系人带入到收件人中。'):
             self.click_element(self.confirm)
@@ -30,8 +30,9 @@ class NewEmailPage(BaseOperate,NewEmailLocator):
             self.element_send_keys(self.subject_edit_text,'邮件主题：%s'%time.strftime('%Y%m%d %H.%M.%S'))
             self.element_send_keys(self.email_content_edit_text,'邮件正文')
             self.click_element(self.email_attach_icon)
-            self.click_element(self.text_element.format('文件'))
-            self.click_element(self.text_element.format('icon.png'))
-            while self.judge_element_exist(self.contains_text_element.format('文件处理中'),2):
+            self.click_element(self.attach_icon)
+            self.click_element(self.attach)
+            while self.judge_element_exist(self.attach_is_processing,2):
                 self.sleep(1)
-            self.click_element(self.text_element.format('发送'))
+            self.get_screenshot()
+            self.click_element(self.send)

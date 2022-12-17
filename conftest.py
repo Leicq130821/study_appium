@@ -4,19 +4,21 @@
 # @FileName: conftest.py
 
 from common.init_app import init_app
+from utils.log import get_logger
 from common.base_operate import BaseOperate
-import pytest,allure
+import pytest,allure,time
 
 # 登录
 @pytest.fixture(scope='session')
 def login():
     driver=init_app()
     global base_operate
-    base_operate=BaseOperate(driver)
-    base_operate.click_element(base_operate.text_element.format('允许'))
-    base_operate.element_send_keys(base_operate.class_element.format('android.widget.EditText'),'lcq_ui_test')
-    base_operate.element_send_keys(base_operate.class_element.format('android.widget.EditText'),'123456',index=1)
-    base_operate.click_element(base_operate.text_element.format('登录'))
+    logger=get_logger(time.strftime('登录：%Y%m%d %Y%m%d %H.%M'))
+    base_operate=BaseOperate(driver,logger)
+    base_operate.click_element(('允许','//*[@text="允许"]'))
+    base_operate.element_send_keys(('账号输入框','//android.widget.EditText'),'lcq_ui_test')
+    base_operate.element_send_keys(('密码输入框','//android.widget.EditText'),'123456',index=1)
+    base_operate.click_element(('登录','//*[@text="登录"]'))
     return driver
 
 # 用例失败添加截图
